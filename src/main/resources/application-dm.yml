@@ -1,0 +1,141 @@
+spring:
+  cache:
+    type: redis
+  datasource:
+    dynamic:
+      # 主数据源
+      primary: rwa
+      # 可能存在多个库的情况，所以可能配置多数据源
+      # 目前多数据源使用 动态数据源， 使用@Ds("data") 即可切换， 方法 优先 类
+      datasource:
+        # 数据源1 RWA
+        rwa:
+          url:  jdbc:mysql://124.221.81.62:3306/mtrwa?serverTimezone=UTC&useSSL=false&useUnicode=true&characterEncoding=UTF-8
+          type: com.zaxxer.hikari.HikariDataSource
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          username: root
+          password: Root123456?
+      hikari:
+        connection-timeout: 300000
+        minimum-idle: 5
+        maximum-pool-size: 10
+        auto-commit: true
+        idle-timeout: 600000
+        pool-name: HikariCP-dm
+        max-lifetime: 3600000
+        connection-test-query: SELECT 1 FROM DUAL
+
+  redis:
+    redisson:
+      config: |
+        singleServerConfig:
+          address: "redis://124.221.81.62:6379"
+          password: null
+          database: 0
+        threads: 4
+# 192.168.13.184 192.168.209.147 192.168.43.181
+#        sentinelServersConfig:
+#          sentinelAddresses:
+#            - "redis://127.0.0.1:18081"
+#            - "redis://127.0.0.1:18082"
+#            - "redis://127.0.0.1:18083"
+#          masterName: mymaster
+#          database: 0
+#          password: redis
+#          checkSentinelsList: false
+#        threads: 4
+
+#        clusterServersConfig:
+#          nodeAddresses:
+#            - "redis://127.0.0.1:7004"
+#            - "redis://127.0.0.1:7001"
+#            - "redis://127.0.0.1:7000"
+#        threads: 8
+
+  cloud:
+    nacos:
+      server-addr: 124.221.81.62:8848
+      discovery:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        group: rwa
+        namespace: ${spring.profiles.active}
+      config:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        file-extension: yml
+        encode: UTF-8
+        group: rwa
+        namespace: ${spring.profiles.active}
+
+  task:
+    execution:
+      pool:
+        # 核心线程数
+        core-size: 8
+        max-size: 8
+        queue-capacity: 1000
+        keep-alive: 16
+      thread-name-prefix: async-task-
+# 加密 密钥
+jasypt:
+  encryptor:
+    password: rwa
+
+rwa:
+  # 主数据源 数据库类型
+  db-type: oracle
+  # 判断是否存在分区的时候使用，mysql使用
+  db-schema: rwa
+  # sql支持版本， 旧版本为o， 新版本为 n， mysql5.7为 o， 默认为 n即可
+  db-ssv: n
+  # 启用分区按照分区清理，没有启用按照结果流水号清理
+  db-partition: false
+  # 只有oralce在使用该配置，分区为true时
+  db-tablespace: RWA_DATA
+  # 分组 在插入后是否 做表分析
+  group-analyze: true
+  # 多线程消费计算是否使用结果子表插入[非零售&零售]
+  writer-sub-table: false
+
+engine:
+  # 引擎计算时的通用批量处理数
+  batchcount: 10000
+  # 数据校验不通过程序返回结果(0-返回成功标志 1-返回失败标志)
+  checkfalseresult: 0
+  # 数据校验不通过是否继续运行(0-删除错误数据继续运行 1-异常退出)
+  checkrunflag: 1
+  # 多线程计算中的线程数
+  threadcount: 10
+  # 本行组织机构代码
+  orgcode: XN9999
+  # 子公司机构号
+  subcompanyorgid: XN999999
+  # 是否从客户表取客户信息，如果是0代表从市场风险暴露表取数，1代表从客户表取数
+  enableclientinfo: 0
+
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://localhost:7001/eureka
+
+xxl:
+  job:
+    # 执行器开关
+    enabled: true
+    # 调度中心地址：如调度中心集群部署存在多个地址则用逗号分隔。
+    addresses: http://124.221.81.62:8080/xxl-job-admin
+    # 执行器通讯TOKEN：非空时启用
+    accessToken: default_token
+    # 执行器配置
+    executor:
+      # 执行器AppName：执行器心跳注册分组依据；为空则关闭自动注册
+      appname: demo-executor
+      # 执行器端口号 执行器从19901开始往后写
+      port: 9901
+      # 执行器注册：默认IP:PORT
+      address:
+      # 执行器IP：默认自动获取IP
+      ip:
+      # 执行器运行日志文件存储磁盘路径
+      logpath: ./logs/${spring.application.name}/xxl-job
+      # 执行器日志文件保存天数：大于3生效
+      logretentiondays: 30

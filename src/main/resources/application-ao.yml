@@ -1,0 +1,104 @@
+spring:
+  cache:
+    type: redis
+  datasource:
+    dynamic:
+      # 主数据源
+      primary: rwa
+      # 可能存在多个库的情况，所以可能配置多数据源
+      # 目前多数据源使用 动态数据源， 使用@Ds("data") 即可切换， 方法 优先 类
+      datasource:
+        # 数据源1 RWA
+        rwa:
+          url: jdbc:oracle:thin:@192.168.50.23:1521:orcl
+          type: com.zaxxer.hikari.HikariDataSource
+          driver-class-name: oracle.jdbc.OracleDriver
+          username: RWA_GL
+          password: RWA_GL
+
+      hikari:
+        connection-timeout: 300000
+        minimum-idle: 5
+        maximum-pool-size: 10
+        auto-commit: true
+        idle-timeout: 600000
+        pool-name: HikariCP-ao
+        max-lifetime: 3600000
+        connection-test-query: SELECT 1 FROM DUAL
+
+  redis:
+    redisson:
+      config: |
+        singleServerConfig:
+          address: "redis://localhost:6379"
+          password: null
+          database: 0
+        threads: 4
+# 192.168.13.184 192.168.209.147 192.168.43.181
+#        sentinelServersConfig:
+#          sentinelAddresses:
+#            - "redis://127.0.0.1:18081"
+#            - "redis://127.0.0.1:18082"
+#            - "redis://127.0.0.1:18083"
+#          masterName: mymaster
+#          database: 0
+#          password: redis
+#          checkSentinelsList: false
+#        threads: 4
+
+#        clusterServersConfig:
+#          nodeAddresses:
+#            - "redis://127.0.0.1:7004"
+#            - "redis://127.0.0.1:7001"
+#            - "redis://127.0.0.1:7000"
+#        threads: 8
+
+  task:
+    execution:
+      pool:
+        # 核心线程数
+        core-size: 8
+        max-size: 8
+        queue-capacity: 1000
+        keep-alive: 16
+      thread-name-prefix: async-task-
+# 加密 密钥
+jasypt:
+  encryptor:
+    password: rwa
+
+rwa:
+  # 主数据源 数据库类型
+  db-type: oracle
+  # 判断是否存在分区的时候使用，mysql使用
+  db-schema: rwa
+  # sql支持版本， 旧版本为o， 新版本为 n， mysql5.7为 o， 默认为 n即可
+  db-ssv: n
+  # 启用分区按照分区清理，没有启用按照结果流水号清理
+  db-partition: true
+  # 只有oralce在使用该配置，分区为true时
+  db-tablespace: RWA_DATA
+  # 分组 在插入后是否 做表分析
+  group-analyze: true
+  # 多线程消费计算是否使用结果子表插入[非零售&零售]
+  writer-sub-table: false
+
+engine:
+  # 引擎计算时的通用批量处理数
+  batchcount: 10000
+  # 数据校验不通过程序返回结果(0-返回成功标志 1-返回失败标志)
+  checkfalseresult: 0
+  # 数据校验不通过是否继续运行(0-删除错误数据继续运行 1-异常退出)
+  checkrunflag: 1
+  # 多线程计算中的线程数
+  threadcount: 10
+  # 本行组织机构代码
+  orgcode: XN9999
+  # 子公司机构号
+  subcompanyorgid: XN999999
+  # 是否从客户表取客户信息，如果是0代表从市场风险暴露表取数，1代表从客户表取数
+  enableclientinfo: 0
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://localhost:7001/eureka

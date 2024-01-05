@@ -1,0 +1,19 @@
+spring:
+  profiles:
+    active: dm
+  application:
+    name: rwame
+
+  cloud:
+    nacos:
+      server-addr: 124.221.81.62:8848
+      discovery:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        group: rwame
+        namespace: ${spring.profiles.active}
+      config:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        file-extension: yml
+        encode: UTF-8
+        group: rwame
+        namespace: ${spring.profiles.active}

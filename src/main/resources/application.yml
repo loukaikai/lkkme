@@ -1,0 +1,44 @@
+spring:
+  profiles:
+    active: dm
+  application:
+    name: rwame
+
+  main:
+    allow-bean-definition-overriding: true
+
+management:
+  endpoint:
+    shutdown:
+      enabled: true
+    health:
+      show-details: always
+
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+  server:
+    port: 18090
+    address: 127.0.0.1
+
+server:
+  port: 8091
+  servlet:
+    context-path: /rwame
+
+# mybatis-plus:
+#   mapper-locations: classpath:mapper/*/*.xml
+#   configuration:
+#     call-setters-on-nulls: true
+#   type-handlers-package: com.amarsoft.rwa.engine.config.handler
+
+logging:
+  classpath: log4j2.xml
+#  level:
+#    root: info
+#    com.amarsoft: debug
+#    org.springframework.jdbc.core.JdbcTemplate: debug
+#  file:
+#    path: logs
